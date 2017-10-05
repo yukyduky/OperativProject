@@ -50,7 +50,7 @@ int main(void) {
                 break;
             case 2: // ls
                 std::cout << "Listing directory" << std::endl;
-				std::cout << fileSys.listDir() << std::endl;
+				std::cout << fileSys.listDir(commandArr[1]) << std::endl;
                 break;
             case 3: // create
                 break;
