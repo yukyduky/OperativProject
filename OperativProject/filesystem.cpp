@@ -10,15 +10,17 @@ FileSystem::~FileSystem() {
 
 int FileSystem::createDirectory(std::string name)
 {
+	int result = 0;
 	Directory* startDir = nullptr;
+	bool sameNameFound = false;
 	int i = 0;
 
 	// Fails if no argument is given
 	if (name == "") {
-		return -1;
+		result = -1;
 	}
 	else if (name.back() == '/') {
-		return 1;
+		result = 1;
 	}
 	else {
 		// A '/' as the first symbol in the pathname signifies an absolute path
@@ -56,23 +58,17 @@ int FileSystem::createDirectory(std::string name)
 			// Else we need to iterate through them to check if there exists one with the same name already and use that one instead of creating a new one
 			else
 			{
-				std::list<Directory>::iterator it = startDir->dirs.begin();
+				sameNameFound = false;
 
-				// Find the right element
-				while (it->name != dirName && it != it->dirs.end()) {
-					it++;
+				for (std::list<Directory>::iterator it = startDir->dirs.begin(); it != startDir->dirs.end(); it++) {
+					if (it->name == dirName) {
+						sameNameFound = true;
+						startDir = &(*it);
+						break;
+					}
 				}
 
-				// If loop ended before the end of the list, then we got a directory with the same name
-				if (it != it->dirs.end()) {
-					startDir = &(*it);
-				}
-				// We miss the last element in the loop so we have to do a separate check for it
-				else if (it->dirs.end()->name == dirName) {
-					startDir = &(*it);
-				}
-				// Else the directory wasn't found and we create one and add it to the list
-				else {
+				if (!sameNameFound) {
 					// Create the new directory and add it to the list of directories in the current directory along the path
 					startDir->dirs.push_back(Directory(dirName, startDir));
 					// Move up the current directory to the one we just created
@@ -82,9 +78,13 @@ int FileSystem::createDirectory(std::string name)
 
 			i++;
 		}
+		// If last directory wasn't a unique name, return error
+		if (sameNameFound) {
+			result = 2;
+		}
 	}
 
-	return 0;
+	return result;
 }
 
 
