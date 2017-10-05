@@ -1,6 +1,7 @@
 #include "filesystem.h"
 
 FileSystem::FileSystem() : currentDir(rootDir), currentPath("") {
+	this->rootDir->parent = NULL;
 
 }
 
@@ -45,9 +46,35 @@ void FileSystem::format()
 	
 }
 
-void FileSystem::removeFolder(std::string dirPath)
+int FileSystem::removeFolder(std::string dirPath)
 {
-	Directory* currentDir;
-	std::string nextDir;
+	Directory* currDir;
 
+	if (dirPath == "")
+	{
+		return -1;
+	}
+	else
+	{
+		if (dirPath[0] == '/') //Check if it's an absolut path
+		{
+			currDir = this->rootDir;
+			int i = 1;
+			while (i < dirPath.size())
+			{
+				std::string nextDir;
+				
+				while (dirPath[i] != '/' && i < dirPath.size())
+				{
+					nextDir += dirPath[i];
+					i++;
+				}
+
+			}
+		}
+		else
+		{
+
+		}
+	}
 }
