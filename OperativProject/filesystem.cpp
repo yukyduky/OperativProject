@@ -87,5 +87,19 @@ int FileSystem::createDirectory(std::string name)
 	return result;
 }
 
+std::string FileSystem::listDir()
+{
+	std::string list;
 
-/* Please insert your code */
+	for (std::list<Directory>::iterator it = this->currentDir->dirs.begin(); it != this->currentDir->dirs.end(); it++) {
+		list += it->name + "\n";
+	}
+
+	for (std::list<File>::iterator it = this->currentDir->files.begin(); it != this->currentDir->files.end(); it++) {
+		list += it->name + " ";
+		list += it->contains.size();
+		list += " bytes\n";
+	}
+
+	return list;
+}
