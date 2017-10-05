@@ -55,6 +55,19 @@ int main(void) {
             case 6: // restoreImage
                 break;
             case 7: // rm
+				result = fileSys.removeFolder(commandArr[1]);
+				if (result == -1)
+				{
+					std::cout << "Invalide pathname." << std::endl;
+				}
+				else if (result == 1)
+				{
+					std::cout << "Missing final directory name." << std::endl;
+				}
+				else
+				{
+					std::cout << "Successfully removed directory." << std::endl;
+				}
                 break;
             case 8: // cp
                 break;
@@ -63,7 +76,7 @@ int main(void) {
             case 10: // mv
                 break;
             case 11: // mkdir
-				result = fileSys.createDirectory(commandArr[0]);
+				result = fileSys.createDirectory(commandArr[1]);
 				if (result == -1) {
 					std::cout << "Pathname missing, eg: \"test/test/test\" (relative) or \"/test/test/test\" (aboslute)" << std::endl;
 				}
