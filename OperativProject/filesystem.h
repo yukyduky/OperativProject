@@ -13,8 +13,10 @@ private:
 	struct File
 	{
 		std::string name;
-		std::vector<int> blockPosition;
+		std::vector<int> blockPositions;
 		std::string contains;
+
+		File(std::string name, std::vector<int> blockPositions, std::string contains) : name(name), blockPositions(blockPositions), contains(contains) {};
 	};
 
 	struct Directory
@@ -23,11 +25,13 @@ private:
 		std::list<Directory> dirs;
 		std::list<File> files;
 		Directory* parent;
+
+		Directory(std::string name, Directory* parent) : name(name), parent(parent) {};
 	};
 
 	Directory* currentDir;
 	std::string currentPath;
-	Directory* rootDir;
+	Directory rootDir;
 
 public:
     FileSystem();
