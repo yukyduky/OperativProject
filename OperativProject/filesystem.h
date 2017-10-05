@@ -2,12 +2,29 @@
 #define FILESYSTEM_H
 
 #include "memblockdevice.h"
+#include <list>
 
 class FileSystem
 {
 private:
     MemBlockDevice mMemblockDevice;
     // Here you can add your own data structures
+
+	struct File
+	{
+		std::string name;
+		std::vector<int> blockPosition;
+		std::string contains;
+	};
+
+	struct Directory
+	{
+		std::string name;
+		std::list<Directory> dirs;
+		std::list<File> files;
+		Directory* parent;
+	};
+
 public:
     FileSystem();
     ~FileSystem();
