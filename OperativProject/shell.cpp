@@ -19,7 +19,6 @@ std::string help();
 /* More functions ... */
 
 int main(void) {
-
 	std::string userCommand, commandArr[MAXCOMMANDS];
 	std::string user = "user@DV1492";    // Change this if you want another user to be displayed
 	std::string currentDir = "/";    // current directory, used for output
@@ -29,6 +28,10 @@ int main(void) {
     bool bRun = true;
 
     do {
+		for (int i = 0; i < MAXCOMMANDS; i++)
+		{
+			commandArr[i] = "";
+		}
         std::cout << user << ":" << currentDir << "$ ";
         getline(std::cin, userCommand);
 
@@ -42,6 +45,8 @@ int main(void) {
 				bRun = quit();                
                 break;
             case 1: // format
+				fileSys.format();
+				std::cout << "Disk formated." << std::endl;
                 break;
             case 2: // ls
                 std::cout << "Listing directory" << std::endl;
@@ -96,6 +101,15 @@ int main(void) {
 
                 break;
             case 12: // cd
+				result = fileSys.changeDirectory(commandArr[1]);
+				if (result == -1)
+				{
+					std::cout << "Invalide pathname." << std::endl;
+				}
+				else if (result == 1)
+				{
+					std::cout << "Missing final directory name." << std::endl;
+				}
                 break;
             case 13: // pwd
                 break;

@@ -38,7 +38,7 @@ public:
     ~FileSystem();
 
 	void format();
-	int removeFolder(std::string dirPath);
+	
 
     /* These API functions need to be implemented
 	   You are free to specify parameter lists and return values
@@ -56,9 +56,11 @@ public:
 
     /* Removes a folder in the filesystem */
     // removeFolder(...);
+	int removeFolder(std::string dirPath);
 
     /* Function will move the current location to a specified location in the filesystem */
     // goToFolder(...);
+	int changeDirectory(std::string dirPath);
 
     /* This function will get all the files and folders in the specified folder */
     // listDir(...);

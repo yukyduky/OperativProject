@@ -8,6 +8,13 @@ FileSystem::~FileSystem() {
 
 }
 
+void FileSystem::format()
+{
+	this->mMemblockDevice.reset();
+	this->rootDir.dirs.clear();
+	this->rootDir.files.clear();
+}
+
 int FileSystem::createDirectory(std::string name)
 {
 	int result = 0;
@@ -87,25 +94,16 @@ int FileSystem::createDirectory(std::string name)
 	return result;
 }
 
-
-/* Please insert your code */
-
-void FileSystem::format()
-{
-	this->mMemblockDevice.reset();
-	
-}
-
 int FileSystem::removeFolder(std::string dirPath)
 {
 	int returnValue = 0;
 	Directory* currDir;
 
-	if (dirPath == "")
+	if (dirPath == "") //check if there is a path
 	{
 		returnValue = -1;
 	}
-	else if (dirPath.back() == '/')
+	else if (dirPath.back() == '/') //check if the path ends with '/' and therefore is invalide
 	{
 		returnValue = 1;
 	}
@@ -115,39 +113,40 @@ int FileSystem::removeFolder(std::string dirPath)
 		bool checker = false;
 		std::string latest;
 	
-		if (dirPath[0] == '/') //Check if it's an absolut path
+		if (dirPath[0] == '/') //Check if it's an absolut path and if it is we set the starting directory to the root directory.
 		{
 			currDir = &this->rootDir;
 			i = 1;
 		}
 		else 
 		{
-			currDir = this->currentDir;
+			currDir = this->currentDir; //set starting directory to current directory if the given path is realitve
 		}
 		
 		while (i < dirPath.size())
 		{
 			std::string nextDir;
-			if (dirPath[i] == '/')
+			if (dirPath[i] == '/') //removes the '/' between directories
 			{
 				i++;
 			}
 			
-			while (dirPath[i] != '/' && i < dirPath.size())
+			while (dirPath[i] != '/' && i < dirPath.size()) //saves the next directory to a string
 			{
 				nextDir += dirPath[i];
 				i++;
 			}
-			latest = nextDir;
-			if (nextDir == "..")
+			latest = nextDir; //saves the name of the latest directory for future use.
+			if (nextDir == "..") // if the next directory name is ".." we move the currDir to the parent. 
 			{
 				currDir = currDir->parent;
 			}
 			else
 			{
+				//Search through the current directories children for the next directory to step into.
 				for (std::list<Directory>::iterator j=currDir->dirs.begin(); j != currDir->dirs.end(); j++)
 				{
-					if (j->name == nextDir)
+					if (j->name == nextDir) 
 					{
 						currDir = &(*j);
 						checker = true;
@@ -160,16 +159,97 @@ int FileSystem::removeFolder(std::string dirPath)
 				}
 			}
 		}
-		currDir = currDir->parent;
-		for (std::list<Directory>::iterator j = currDir->dirs.begin(); j != currDir->dirs.end(); j++)
+		//We now stand inside the folder we want to remove, we therefore step to it's parent and remove the folder 
+		// we just stood in.
+		if (checker)
 		{
-			if (j->name == latest)
+			currDir = currDir->parent;
+			for (std::list<Directory>::iterator j = currDir->dirs.begin(); j != currDir->dirs.end(); j++)
 			{
-				j = currDir->dirs.erase(j);
-				break;
+				if (j->name == latest)
+				{
+					j = currDir->dirs.erase(j);
+					break;
+				}
 			}
-		}			
+		}
 	}
 
-	return 0;
+	return returnValue;
+}
+
+int FileSystem::changeDirectory(std::string dirPath)
+{
+	int returnValue = 0;
+
+	Directory* currDir;
+
+	if (dirPath == "")
+	{
+		this->currentDir = &this->rootDir;
+	}
+	else if (dirPath.back() == '/')
+	{
+		returnValue = 1;
+	}
+	else
+	{
+		int i = 0;
+		bool checker = false;
+		std::string latest;
+
+		if (dirPath[0] == '/') //Check if it's an absolut path and if it is we set the starting directory to the root directory.
+		{
+			currDir = &this->rootDir;
+			i = 1;
+		}
+		else
+		{
+			currDir = this->currentDir; //set starting directory to current directory if the given path is realitve
+		}
+
+		while (i < dirPath.size() && returnValue != -1)
+		{
+			checker = false;
+			std::string nextDir;
+			if (dirPath[i] == '/') //removes the '/' between directories
+			{
+				i++;
+			}
+
+			while (dirPath[i] != '/' && i < dirPath.size()) //saves the next directory to a string
+			{
+				nextDir += dirPath[i];
+				i++;
+			}
+			latest = nextDir; //saves the name of the latest directory for future use.
+			if (nextDir == "..") // if the next directory name is ".." we move the currDir to the parent. 
+			{
+				currDir = currDir->parent;
+				checker = true;
+			}
+			else
+			{
+				//Search through the current directories children for the next directory to step into.
+				for (std::list<Directory>::iterator j = currDir->dirs.begin(); j != currDir->dirs.end(); j++)
+				{
+					if (j->name == nextDir)
+					{
+						currDir = &(*j);
+						checker = true;
+						break;
+					}
+				}
+				if (!checker)
+				{
+					returnValue = -1;
+				}
+			}
+		}
+		if (checker)
+		{
+			this->currentDir = currDir;
+		}
+	}
+	return returnValue;
 }
