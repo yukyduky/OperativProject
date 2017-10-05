@@ -25,6 +25,9 @@ private:
 		Directory* parent;
 	};
 
+	Directory* currentDir;
+	std::string currentPath;
+	Directory* rootDir;
 
 public:
     FileSystem();
@@ -42,6 +45,7 @@ public:
 
     /* Creates a folder in the filesystem */
     // createFolderi(...);
+	int createDirectory(std::string name);
 
     /* Removes a file in the filesystem */
     // removeFile(...);
