@@ -29,7 +29,7 @@ private:
 		Directory(std::string name, Directory* parent) : name(name), parent(parent) {};
 	};
 
-	Directory* currentDir;
+	Directory* workingDir;
 	std::string currentPath;
 	Directory rootDir;
 
@@ -43,6 +43,7 @@ public:
 
     /* This function creates a file in the filesystem */
     // createFile(...)
+	int createFile(std::string name, std::string contains);
 
     /* Creates a folder in the filesystem */
 	int createDirectory(std::string name);
@@ -62,6 +63,12 @@ public:
 
 	std::string printWorkingDir();
     /* Add your own member-functions if needed */
+
+	int getNextDir(std::string dirName, Directory** currentDir);
+	int getPrevDir(std::string dirName, Directory** currentDir);
+	int getDirFromPath(std::string path, Directory** pathDir, bool createDirs);
+	int getFileNameFromPath(std::string& path, std::string& fileName);
+	int getNextDirNameFromPath(std::string& path, std::string& dirName);
 };
 
 #endif // FILESYSTEM_H

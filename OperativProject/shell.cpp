@@ -6,7 +6,7 @@ const int MAXCOMMANDS = 8;
 const int NUMAVAILABLECOMMANDS = 15;
 
 std::string availableCommands[NUMAVAILABLECOMMANDS] = {
-    "quit","format","ls","create","cat","createImage","restoreImage",
+    "quit", "format","ls","create","cat","createImage","restoreImage",
     "rm","cp","append","mv","mkdir","cd","pwd","help"
 };
 
@@ -77,6 +77,8 @@ int main(void) {
 				case 2:
 					std::cout << "A folder with that name already exists." << std::endl;
 					break;
+				case 3:
+					std::cout << "This shouldn't happen." << std::endl;
 				default:
 					std::cout << "Successfully created a new dir." << std::endl;
 					break;
