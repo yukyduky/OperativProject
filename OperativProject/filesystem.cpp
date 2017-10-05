@@ -103,3 +103,24 @@ std::string FileSystem::listDir()
 
 	return list;
 }
+
+std::string FileSystem::printWorkingDir()
+{
+	std::string path;
+	Directory* startDir = this->currentDir;
+
+	// Get the name of the current dir
+	path += startDir->name;
+
+	// While startDir has a parent, continue
+	while (startDir->parent != nullptr) {
+		// Set startDir to its parent
+		startDir = startDir->parent;
+		// Get the name of startDir and add the rest of the path on top
+		path = startDir->name + '/' + path;		
+	}
+
+	path = '/' + path;
+
+	return path;
+}

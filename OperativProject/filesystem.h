@@ -60,6 +60,7 @@ public:
     // listDir(...);
 	std::string listDir();
 
+	std::string printWorkingDir();
     /* Add your own member-functions if needed */
 };
 

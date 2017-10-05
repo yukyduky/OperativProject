@@ -86,6 +86,7 @@ int main(void) {
             case 12: // cd
                 break;
             case 13: // pwd
+				std::cout << fileSys.printWorkingDir() << std::endl;
                 break;
             case 14: // help
                 std::cout << help() << std::endl;
