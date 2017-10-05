@@ -59,11 +59,12 @@ public:
 
     /* This function will get all the files and folders in the specified folder */
     // listDir(...);
-	std::string listDir();
+	std::string listDir(std::string name);
 
 	std::string printWorkingDir();
     /* Add your own member-functions if needed */
 
+	int parsePathAndDir(std::string& path, Directory** pathDir);
 	int getNextDir(std::string dirName, Directory** currentDir);
 	int getPrevDir(std::string dirName, Directory** currentDir);
 	int getDirFromPath(std::string path, Directory** pathDir, bool createDirs);
