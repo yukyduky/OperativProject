@@ -77,15 +77,23 @@ int main(void) {
                 break;
             case 11: // mkdir
 				result = fileSys.createDirectory(commandArr[1]);
-				if (result == -1) {
+				
+				switch (result)
+				{
+				case -1:
 					std::cout << "Pathname missing, eg: \"test/test/test\" (relative) or \"/test/test/test\" (aboslute)" << std::endl;
-				}
-				else if (result == 1) {
+					break;
+				case 1:
 					std::cout << "Missing final directory name." << std::endl;
-				}
-				else {
+					break;
+				case 2:
+					std::cout << "A folder with that name already exists." << std::endl;
+					break;
+				default:
 					std::cout << "Successfully created a new dir." << std::endl;
+					break;
 				}
+
                 break;
             case 12: // cd
                 break;
