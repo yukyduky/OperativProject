@@ -47,6 +47,7 @@ void FileSystem::format()
 
 void FileSystem::removeFolder(std::string dirPath)
 {
+	Directory* currentDir;
 	std::string nextDir;
 
 }
