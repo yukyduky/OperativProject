@@ -56,25 +56,63 @@ int FileSystem::removeFolder(std::string dirPath)
 	}
 	else
 	{
+		int i = 0;
+		bool checker = false;
+		std::string latest;
+	
 		if (dirPath[0] == '/') //Check if it's an absolut path
 		{
 			currDir = this->rootDir;
-			int i = 1;
-			while (i < dirPath.size())
+			i = 1;
+		}
+		else 
+		{
+			currDir = this->currentDir;
+		}
+		
+		while (i < dirPath.size())
+		{
+			std::string nextDir;
+			if (dirPath[i] == '/')
 			{
-				std::string nextDir;
-				
-				while (dirPath[i] != '/' && i < dirPath.size())
+				i++;
+			}
+			
+			while (dirPath[i] != '/' && i < dirPath.size())
+			{
+				nextDir += dirPath[i];
+				i++;
+			}
+			latest = nextDir;
+			if (nextDir == "..")
+			{
+				currDir = currDir->parent;
+			}
+			else
+			{
+				for (std::list<Directory>::iterator j=currDir->dirs.begin(); j != currDir->dirs.end(); j++)
 				{
-					nextDir += dirPath[i];
-					i++;
+					if (j->name == nextDir)
+					{
+						currDir = &(*j);
+						checker = true;
+					}
+				} 
+				if (!checker)
+				{
+					return -1;
 				}
-
 			}
 		}
-		else
+		currDir = currDir->parent;
+		for (std::list<Directory>::iterator j = currDir->dirs.begin(); j != currDir->dirs.end(); j++)
 		{
-
-		}
+			if (j->name == latest)
+			{
+				j = currDir->dirs.erase(j);
+			}
+		}			
 	}
+
+	return 1;
 }
