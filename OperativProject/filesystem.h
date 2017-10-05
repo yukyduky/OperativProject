@@ -25,9 +25,13 @@ private:
 		Directory* parent;
 	};
 
+
 public:
     FileSystem();
     ~FileSystem();
+
+	void format();
+	void removeFolder(std::string dirPath);
 
     /* These API functions need to be implemented
 	   You are free to specify parameter lists and return values
