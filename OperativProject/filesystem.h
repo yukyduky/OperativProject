@@ -48,7 +48,6 @@ public:
     // createFile(...)
 
     /* Creates a folder in the filesystem */
-    // createFolderi(...);
 	int createDirectory(std::string name);
 
     /* Removes a file in the filesystem */
@@ -64,7 +63,9 @@ public:
 
     /* This function will get all the files and folders in the specified folder */
     // listDir(...);
+	std::string listDir();
 
+	std::string printWorkingDir();
     /* Add your own member-functions if needed */
 };
 

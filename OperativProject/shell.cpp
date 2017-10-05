@@ -50,6 +50,7 @@ int main(void) {
                 break;
             case 2: // ls
                 std::cout << "Listing directory" << std::endl;
+				std::cout << fileSys.listDir() << std::endl;
                 break;
             case 3: // create
                 break;
@@ -112,6 +113,7 @@ int main(void) {
 				}
                 break;
             case 13: // pwd
+				std::cout << fileSys.printWorkingDir() << std::endl;
                 break;
             case 14: // help
                 std::cout << help() << std::endl;
