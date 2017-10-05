@@ -207,13 +207,6 @@ int FileSystem::changeDirectory(std::string dirPath)
 		{
 			currDir = this->currentDir; //set starting directory to current directory if the given path is realitve
 		}
-std::string FileSystem::listDir()
-{
-	std::string list;
-
-	for (std::list<Directory>::iterator it = this->currentDir->dirs.begin(); it != this->currentDir->dirs.end(); it++) {
-		list += it->name + "\n";
-	}
 
 		while (i < dirPath.size() && returnValue != -1)
 		{
@@ -260,6 +253,14 @@ std::string FileSystem::listDir()
 	}
 	return returnValue;
 }
+
+std::string FileSystem::listDir()
+{
+	std::string list;
+
+	for (std::list<Directory>::iterator it = this->currentDir->dirs.begin(); it != this->currentDir->dirs.end(); it++) {
+		list += it->name + "\n";
+	}
 	for (std::list<File>::iterator it = this->currentDir->files.begin(); it != this->currentDir->files.end(); it++) {
 		list += it->name + " ";
 		list += it->contains.size();
