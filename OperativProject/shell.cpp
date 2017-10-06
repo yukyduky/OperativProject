@@ -29,10 +29,6 @@ int main(void) {
     bool bRun = true;
 
     do {
-		for (int i = 0; i < MAXCOMMANDS; i++) {
-			commandArr[i].clear();
-		}
-
         std::cout << user << ":" << currentDir << "$ ";
         getline(std::cin, userCommand);
 
@@ -49,35 +45,10 @@ int main(void) {
                 break;
             case 2: // ls
                 std::cout << "Listing directory" << std::endl;
-				std::cout << fileSys.list(commandArr[1]) << std::endl;
+				std::cout << fileSys.listDir(commandArr[1]) << std::endl;
                 break;
             case 3: // create
-			{
-				std::string content = "";
-				std::cout << "Input content: ";
-				std::cin >> content;
-				result = fileSys.createFile(commandArr[1], content);
-
-				switch (result)
-				{
-				case -1:
-					std::cout << "Pathname missing, eg: \"test/test/test\" (relative) or \"/test/test/test\" (aboslute)" << std::endl;
-					break;
-				case 1:
-					std::cout << "Content exceeds max length." << std::endl;
-					break;
-				case 2:
-					std::cout << "Not enough memory left." << std::endl;
-					break;
-				case 3:
-					std::cout << "Failed to write to memory." << std::endl;
-				default:
-					std::cout << "Successfully created a new file." << std::endl;
-					break;
-				}
-
-				break;
-			}
+                break;
             case 4: // cat
                 break;
             case 5: // createImage

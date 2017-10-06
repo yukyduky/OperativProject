@@ -53,19 +53,6 @@ int Block::size() const {
     return this->nrOfElements;
 }
 
-int Block::getNulTerminatorPos()
-{
-	int output = -1;
-
-	for (int i = 0; i < this->nrOfElements; i++) {
-		if (block[i] == '\0') {
-			output = i;
-			break;
-		}
-	}
-	return output;
-}
-
 Block Block::readBlock() const {
     return Block(*this);
 }
