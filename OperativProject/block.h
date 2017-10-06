@@ -31,6 +31,7 @@ public:
 
     void reset(char c = 0);  // Sets every element in char-array to 0
     int size() const;   // returns the size
+	int getNulTerminatorPos();
     Block readBlock() const;    // Returns a copy of block
 
     /* Write a block */
