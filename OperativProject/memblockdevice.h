@@ -1,9 +1,13 @@
 #ifndef MEMBLOCKDEVICE_H
 #define MEMBLOCKDEVICE_H
 #include "blockdevice.h"
+#include <array>
 
 class MemBlockDevice: public BlockDevice
 {
+private:
+	std::array<bool, 250> occupiedBlock;
+
 public:
     MemBlockDevice(int nrOfBlocks = 250);
     MemBlockDevice(const MemBlockDevice &other);
@@ -25,11 +29,15 @@ public:
     /* Reads a block */
     Block readBlock(int blockNr) const;
 
+	/* Clears a block*/
+	int clearBlock(int blockNr);
+
     /* Resets all the blocks */
     void reset();
 
     /* Return the size */
     int size() const;
+	int getFirstAvailableBlock();
 };
 
 #endif // MEMBLOCKDEVICE_H

@@ -14,9 +14,8 @@ private:
 	{
 		std::string name;
 		std::vector<int> blockPositions;
-		std::string contains;
 
-		File(std::string name, std::vector<int> blockPositions, std::string contains) : name(name), blockPositions(blockPositions), contains(contains) {};
+		File(std::string name, std::vector<int> blockPositions) : name(name), blockPositions(blockPositions) {};
 	};
 
 	struct Directory
@@ -33,6 +32,16 @@ private:
 	std::string currentPath;
 	Directory rootDir;
 
+	/* Add your own member-functions if needed */
+	int insertIntoString(std::string& moddedString, int moddedStartPos, std::string content);
+	std::string listDir(Directory* dir);
+	int parsePathAndDir(std::string& path, Directory** pathDir);
+	int getNextDir(std::string dirName, Directory** currentDir);
+	int getPrevDir(std::string dirName, Directory** currentDir);
+	int getDirFromPath(std::string path, Directory** pathDir, bool createDirs);
+	int getFileNameFromPath(std::string& path, std::string& fileName);
+	int getNextDirNameFromPath(std::string& path, std::string& dirName);
+
 public:
     FileSystem();
     ~FileSystem();
@@ -43,7 +52,7 @@ public:
 
     /* This function creates a file in the filesystem */
     // createFile(...)
-	int createFile(std::string name, std::string contains);
+	int createFile(std::string name, std::string content);
 
     /* Creates a folder in the filesystem */
 	int createDirectory(std::string name);
@@ -59,17 +68,9 @@ public:
 
     /* This function will get all the files and folders in the specified folder */
     // listDir(...);
-	std::string listDir(std::string name);
+	std::string list(std::string name);
 
 	std::string printWorkingDir();
-    /* Add your own member-functions if needed */
-
-	int parsePathAndDir(std::string& path, Directory** pathDir);
-	int getNextDir(std::string dirName, Directory** currentDir);
-	int getPrevDir(std::string dirName, Directory** currentDir);
-	int getDirFromPath(std::string path, Directory** pathDir, bool createDirs);
-	int getFileNameFromPath(std::string& path, std::string& fileName);
-	int getNextDirNameFromPath(std::string& path, std::string& dirName);
 };
 
 #endif // FILESYSTEM_H
