@@ -88,7 +88,7 @@ int main(void) {
 				result = fileSys.removeFolder(commandArr[1]);
 				if (result == -1)
 				{
-					std::cout << "Invalide pathname." << std::endl;
+					std::cout << "Invalid pathname." << std::endl;
 				}
 				else if (result == 1)
 				{
@@ -131,7 +131,7 @@ int main(void) {
 				result = fileSys.changeDirectory(commandArr[1]);
 				if (result == -1)
 				{
-					std::cout << "Invalide pathname." << std::endl;
+					std::cout << "Invalid pathname." << std::endl;
 				}
 				else if (result == 1)
 				{

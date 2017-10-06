@@ -98,7 +98,7 @@ int MemBlockDevice::clearBlock(int blockNr)
 	if (blockNr < this->nrOfBlocks && blockNr >= 0) {
 		output = 1;
 		this->memBlocks[blockNr].reset();
-		this->occupiedBlock[nrOfBlocks] = false;
+		this->occupiedBlock[blockNr] = false;
 	}
 
 	return output;

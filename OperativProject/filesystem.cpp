@@ -286,6 +286,39 @@ int FileSystem::createDirectory(std::string name)
 	return result;
 }
 
+int FileSystem::removeFile(std::string name)
+{
+	int result = -1;
+	Directory* pathDir = nullptr;
+	std::string path = name;
+	std::string fileName;
+
+	if (parsePathAndDir(path, &pathDir) == 0) {
+		result = 0;
+
+		this->getFileNameFromPath(path, fileName);
+
+		if (this->getDirFromPath(path, &pathDir, false) != 0) {
+			result = 1;
+		}
+
+		if (result == 0) {
+			// Iterate through until right file is found. Clear the blocks that the file occupies and remove it from the list.
+			for (std::list<File>::iterator it = pathDir->files.begin(); it != pathDir->files.end(); it++) {
+				if (it->name == fileName) {
+					for (int i = 0; i < it->blockPositions.size(); i++) {
+						this->mMemblockDevice.clearBlock(it->blockPositions[i]);
+					}
+					pathDir->files.erase(it);
+					break;
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
 int FileSystem::removeFolder(std::string dirPath)
 {
 	int returnValue = 0;

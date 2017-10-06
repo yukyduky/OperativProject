@@ -59,6 +59,7 @@ public:
 
     /* Removes a file in the filesystem */
     // removeFile(...);
+	int removeFile(std::string name);
 
     /* Removes a folder in the filesystem */
     // removeFolder(...);
