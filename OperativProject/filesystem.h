@@ -29,7 +29,7 @@ private:
 		Directory(std::string name, Directory* parent) : name(name), parent(parent) {};
 	};
 
-	Directory* currentDir;
+	Directory* workingDir;
 	std::string currentPath;
 	Directory rootDir;
 
@@ -67,6 +67,9 @@ public:
 
 	std::string printWorkingDir();
     /* Add your own member-functions if needed */
+
+	std::string printFile(std::string dirPath);
+
 };
 
 #endif // FILESYSTEM_H

@@ -55,6 +55,7 @@ int main(void) {
             case 3: // create
                 break;
             case 4: // cat
+				std::cout << fileSys.printFile(commandArr[1]);
                 break;
             case 5: // createImage
                 break;
