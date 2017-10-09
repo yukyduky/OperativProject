@@ -99,6 +99,32 @@ int main(void) {
             case 8: // cp
                 break;
             case 9: // append
+				result = fileSys.appendFileToFile(commandArr[1], commandArr[2]);
+
+				switch (result)
+				{
+				case 0:
+					std::cout << "Successfully appended the file to the other file." << std::endl;
+					break;
+				case -1:
+					std::cout << "Pathname missing, eg: \"test/test/test\" (relative) or \"/test/test/test\" (aboslute)" << std::endl;
+					break;
+				case 1:
+					std::cout << "Directory doesn't exist." << std::endl;
+					break;
+				case 2:
+					std::cout << "Failed to insert into string." << std::endl;
+					break;
+				case 3:
+					std::cout << "Failed to write to memory." << std::endl;
+					break;
+				case 4:
+					std::cout << "File could not be found." << std::endl;
+					break;
+				default:
+					break;
+				}
+
                 break;
             case 10: // mv
                 break;

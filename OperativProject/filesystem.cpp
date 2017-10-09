@@ -265,8 +265,9 @@ int FileSystem::appendFileToFile(std::string dirPath1, std::string dirPath2)
 	if (parsePathAndDir(path1, &pathDir1) == 0 && parsePathAndDir(path2, &pathDir2) == 0) {
 		result = 0;
 
-		this->getFileNameFromPath(path1, fileName1);
-		this->getFileNameFromPath(path2, fileName2);
+		if (this->getFileNameFromPath(path1, fileName1) != -1 && this->getFileNameFromPath(path2, fileName2) != 0) {
+			result = 4;
+		}
 
 		if (this->getDirFromPath(path1, &pathDir1, false) != 0 && this->getDirFromPath(path2, &pathDir2, false != 0)) {
 			result = 1;
@@ -277,7 +278,7 @@ int FileSystem::appendFileToFile(std::string dirPath1, std::string dirPath2)
 			// Iterate through until right file is found. Clear the blocks that the file occupies and remove it from the list.
 			for (std::list<File>::iterator it1 = pathDir1->files.begin(); it1 != pathDir1->files.end(); it1++) {
 				if (it1->name == fileName1) {
-					for (std::list<File>::iterator it2 = pathDir1->files.begin(); it2 != pathDir1->files.end(); it2++) {
+					for (std::list<File>::iterator it2 = pathDir2->files.begin(); it2 != pathDir2->files.end(); it2++) {
 						if (it2->name == fileName2) {
 							std::string content = this->mMemblockDevice.readBlock(it2->blockPositions[0]).toString();
 							int numBlocks = it2->blockPositions.size();
@@ -290,14 +291,21 @@ int FileSystem::appendFileToFile(std::string dirPath1, std::string dirPath2)
 
 							// Get the last content of the file
 							std::string lastBlock = mMemblockDevice.readBlock(it1->blockPositions.back()).toString();
+							std::string parsedLastBlock;
+							parsedLastBlock.resize(512);
+
+							for (int i = 0; i < lastBlock.size(); i++) {
+								parsedLastBlock[i] = lastBlock[i];
+							}
+
 							// Get the position of the end of that content
 							int contentStartPos = lastBlock.size();
 
-							for (int i = 0; i < 512 - contentStartPos; i++) {
-								lastBlock[contentStartPos + i] += content[i];
+							for (int i = 0; i < content.size(); i++) {
+								parsedLastBlock[contentStartPos + i] += content[i];
 							}
 							// Overwrite the last block with the now topped off one
-							if (this->mMemblockDevice.writeBlock(it1->blockPositions.back(), lastBlock) == 1) {
+							if (this->mMemblockDevice.writeBlock(it1->blockPositions.back(), parsedLastBlock) == 1 && content.size() > 512) {
 								// Remove the part that we put in the lastBlock
 								content = content.substr(512 - contentStartPos, content.size());
 								// Get the amount of blocks left to write
@@ -312,8 +320,34 @@ int FileSystem::appendFileToFile(std::string dirPath1, std::string dirPath2)
 								}
 								parsedContent[numBlocks - 1].resize(512);
 								// Insert the odd left overs and put a nul terminator at the end
-								if (this->insertIntoString(parsedContent[numBlocks - 1], 0, content) == -1) {
-									result = 1;
+								if (this->insertIntoString(parsedContent[numBlocks - 1], 0, content) != -1) {
+									// Get the first available blocks of the required amount
+									std::vector<int> blockPositions = this->mMemblockDevice.getFirstAvailableBlocks(numBlocks);
+
+									if (blockPositions.back() != -1) {
+										// Try and write the content to the blocks
+										for (int i = 0; i < numBlocks; i++) {
+											if (this->mMemblockDevice.writeBlock(blockPositions[i], parsedContent[i]) != 1) {
+												// If it should fail to write one after having already written at least one, clear the ones that have been written to before breaking out
+												for (int k = 0; k < i; k++) {
+													this->mMemblockDevice.clearBlock(blockPositions[k]);
+												}
+
+												result = 3;
+												break;
+											}
+										}
+									}
+
+									if (result == 0) {
+										// Add the new block positions to the first files block positions
+										for (int i = 0; i < blockPositions.size(); i++) {
+											it1->blockPositions.push_back(blockPositions[i]);
+										}
+									}
+								}
+								else {
+									result = 2;
 								}
 
 								finished = true;
