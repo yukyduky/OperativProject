@@ -115,15 +115,21 @@ int MemBlockDevice::size() const {
     return this->nrOfBlocks;
 }
 
-int MemBlockDevice::getFirstAvailableBlock()
+std::vector<int> MemBlockDevice::getFirstAvailableBlocks(int nrOfBlocks)
 {
 	int output = -1;
+	std::vector<int> blockPositions;
 
 	for (int i = 0; i < this->occupiedBlock.size(); i++) {
 		if (!this->occupiedBlock[i]) {
-			output = i;
+			blockPositions.push_back(i);
+			break;
 		}
 	}
 
-	return output;
+	if (blockPositions.size() != nrOfBlocks) {
+		blockPositions.push_back(-1);
+	}
+
+	return blockPositions;
 }
