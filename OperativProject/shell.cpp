@@ -86,14 +86,14 @@ int main(void) {
             case 6: // restoreImage
                 break;
             case 7: // rm
-				result = fileSys.removeFolder(commandArr[1]);
+				result = fileSys.removeFile(commandArr[1]);
 				if (result == -1)
 				{
 					std::cout << "Invalid path." << std::endl;
 				}
 				else
 				{
-					std::cout << "Successfully removed directory." << std::endl;
+					std::cout << "Successfully removed File." << std::endl;
 				}
                 break;
             case 8: // cp
