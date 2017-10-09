@@ -97,6 +97,29 @@ int main(void) {
 				}
                 break;
             case 8: // cp
+				result = fileSys.copyFile(commandArr[1], commandArr[2]);
+
+				switch (result)
+				{
+				case 0:
+					std::cout << "Successfully copied the file." << std::endl;
+					break;
+				case -1:
+					std::cout << "Pathname missing, eg: \"test/test/test\" (relative) or \"/test/test/test\" (aboslute)" << std::endl;
+					break;
+				case 1:
+					std::cout << "Directory doesn't exist." << std::endl;
+					break;
+				case 3:
+					std::cout << "Can't copy the file to the same locaton if the file has the same name." << std::endl;
+					break;
+				case 2:
+				case 4:
+					std::cout << "File could not be found." << std::endl;
+					break;
+				default:
+					break;
+				}
                 break;
             case 9: // append
 				result = fileSys.appendFileToFile(commandArr[1], commandArr[2]);

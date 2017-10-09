@@ -68,6 +68,8 @@ public:
     /* Function will move the current location to a specified location in the filesystem */
 	int moveFile(std::string sourcePath, std::string destPath);
 
+	int copyFile(std::string sourcePath, std::string destPath);
+
 	int changeDirectory(std::string dirPath);
 
     /* This function will get all the files and folders in the specified folder */
