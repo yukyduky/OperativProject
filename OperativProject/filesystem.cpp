@@ -1,5 +1,6 @@
 #include "filesystem.h"
 
+
 int FileSystem::insertIntoString(std::string& moddedString, int moddedStartPos, std::string content)
 {
 	int result = -1;
@@ -66,7 +67,7 @@ int FileSystem::getNextDir(std::string dirName, Directory** currentDir)
 	int result = 0;
 	Directory* nextDir = nullptr;
 
-	// Iterate through and look for a dir with the correct name
+	// Iterate through and look for a dir with the correct dirPath
 	for (std::list<Directory>::iterator it = (*currentDir)->dirs.begin(); it != (*currentDir)->dirs.end(); it++) {
 		if (it->name == dirName) {
 			nextDir = &(*it);
@@ -106,7 +107,7 @@ int FileSystem::getDirFromPath(std::string path, Directory** pathDir, bool creat
 	std::string currentPath = path;
 	std::string dirName;
 
-	// Get next dir name and then look for the next dir from that
+	// Get next dir dirPath and then look for the next dir from that
 	while (this->getNextDirNameFromPath(currentPath, dirName) == 0) {
 		if (this->getNextDir(dirName, pathDir) != 0) {
 			if (!createDirs) {
@@ -135,7 +136,7 @@ int FileSystem::getFileNameFromPath(std::string& path, std::string& fileName)
 
 	// If no '/' was found
 	if (fileNamePos != std::string::npos) {
-		// Using substr to split the path from the name
+		// Using substr to split the path from the dirPath
 		fileName = path.substr(fileNamePos + 1);
 		path = path.substr(0, fileNamePos);
 	}
@@ -178,11 +179,11 @@ FileSystem::~FileSystem() {
 
 }
 
-int FileSystem::createFile(std::string name, std::string content)
+int FileSystem::createFile(std::string dirPath, std::string content)
 {
 	int result = 0;
 	Directory* pathDir = nullptr;
-	std::string path = name;
+	std::string path = dirPath;
 	std::string fileName;
 	
 	if (parsePathAndDir(path, &pathDir) == 0) {
@@ -191,68 +192,206 @@ int FileSystem::createFile(std::string name, std::string content)
 
 		this->getDirFromPath(path, &pathDir, true);
 
-		// Calculate how many complete blocks are needed. We add 1 since it always rounds downwards.
-		int numBlocks = (content.size() / 512) + 1;
-		std::vector<std::string> parsedContent(numBlocks);
-
-		for (int i = 0; i < numBlocks - 1; i++) {
-			parsedContent[i].resize(512);
-			// Insert the content in blocks of 512
-			parsedContent[i] = content.substr(0, 512);
-			// Remove what we just added
-			content = content.substr(512);
-		}
-		parsedContent[numBlocks - 1].resize(512);
-		// Insert the odd left overs and put a nul terminator at the end
-		if (this->insertIntoString(parsedContent[numBlocks - 1], 0, content) == -1) {
-			result = 1;
-		}
-
-		std::vector<int> blockPositions(numBlocks);
-
-		// Get the first available blocks required to store the content
-		for (int i = 0; i < numBlocks; i++) {
-			if (this->mMemblockDevice.getFirstAvailableBlock() != -1) {
-				blockPositions[i] = this->mMemblockDevice.getFirstAvailableBlock();
-			}
-			else {
-				result = 2;
+		for (std::list<File>::iterator it = pathDir->files.begin(); it != pathDir->files.end(); it++) {
+			if (it->name == fileName) {
+				result = 4;
 				break;
 			}
 		}
 
 		if (result == 0) {
-			// Try and write the content to the blocks
-			for (int i = 0; i < numBlocks; i++) {
-				if (this->mMemblockDevice.writeBlock(blockPositions[i], parsedContent[i]) != 1) {
-					// If it should fail to write one after having already written at least one, clear the ones that have been written to before breaking out
-					for (int k = 0; k < i; k++) {
-						this->mMemblockDevice.clearBlock(blockPositions[k]);
-					}
+			// Calculate how many complete blocks are needed. We add 1 since it always rounds downwards.
+			int numBlocks = (content.size() / 512) + 1;
+			std::vector<std::string> parsedContent(numBlocks);
 
-					result = 3;
-					break;
+			for (int i = 0; i < numBlocks - 1; i++) {
+				// Insert the content in blocks of 512
+				parsedContent[i] = content.substr(0, 512);
+				// Remove what we just added
+				content = content.substr(512);
+			}
+			parsedContent[numBlocks - 1].resize(512);
+			// Insert the odd left overs and put a nul terminator at the end
+			if (this->insertIntoString(parsedContent[numBlocks - 1], 0, content) == -1) {
+				result = 1;
+			}
+
+			// Get the first available blocks of the required amount
+			std::vector<int> blockPositions = this->mMemblockDevice.getFirstAvailableBlocks(numBlocks);
+
+			if (blockPositions.back() != -1) {
+				// Try and write the content to the blocks
+				for (int i = 0; i < numBlocks; i++) {
+					if (this->mMemblockDevice.writeBlock(blockPositions[i], parsedContent[i]) != 1) {
+						// If it should fail to write one after having already written at least one, clear the ones that have been written to before breaking out
+						for (int k = 0; k < i; k++) {
+							this->mMemblockDevice.clearBlock(blockPositions[k]);
+						}
+
+						result = 3;
+						break;
+					}
+				}
+
+				if (result == 0) {
+					// Add the file to the dir
+					pathDir->files.push_back(File(fileName, blockPositions));
 				}
 			}
+			else {
+				result = 2;
+			}
 		}
-
-		if (result == 0) {
-			// Add the file to the dir
-			pathDir->files.push_back(File(fileName, blockPositions));
+		else {
+			result = -1;
 		}
-	}
-	else {
-		result = -1;
 	}
 
 	return result;
 }
 
-int FileSystem::createDirectory(std::string name)
+int FileSystem::appendFileToFile(std::string dirPath1, std::string dirPath2)
+{
+	int result = -1;
+	Directory* pathDir1 = nullptr;
+	Directory* pathDir2 = nullptr;
+	std::string path1 = dirPath1;
+	std::string path2 = dirPath2;
+	std::string fileName1;
+	std::string fileName2;
+
+	if (parsePathAndDir(path1, &pathDir1) == 0 && parsePathAndDir(path2, &pathDir2) == 0) {
+		result = 0;
+
+		this->getFileNameFromPath(path1, fileName1);
+		this->getFileNameFromPath(path2, fileName2);
+
+		if (this->getDirFromPath(path1, &pathDir1, false) != 0 && this->getDirFromPath(path2, &pathDir2, false != 0)) {
+			result = 1;
+		}
+
+		if (result == 0) {
+			bool finished = false;
+			// Iterate through until right file is found. Clear the blocks that the file occupies and remove it from the list.
+			for (std::list<File>::iterator it1 = pathDir1->files.begin(); it1 != pathDir1->files.end(); it1++) {
+				if (it1->name == fileName1) {
+					for (std::list<File>::iterator it2 = pathDir1->files.begin(); it2 != pathDir1->files.end(); it2++) {
+						if (it2->name == fileName2) {
+							std::string content = this->mMemblockDevice.readBlock(it2->blockPositions[0]).toString();
+							int numBlocks = it2->blockPositions.size();
+							for (int i = 1; i < numBlocks; i++) {
+								std::string tmp = this->mMemblockDevice.readBlock(it2->blockPositions[i]).toString();
+								for (int k = 0; k < tmp.size(); k++) {
+									content += tmp[k];
+								}
+							}
+
+							// Get the last content of the file
+							std::string lastBlock = mMemblockDevice.readBlock(it1->blockPositions.back()).toString();
+							// Get the position of the end of that content
+							int contentStartPos = lastBlock.size();
+
+							for (int i = 0; i < 512 - contentStartPos; i++) {
+								lastBlock[contentStartPos + i] += content[i];
+							}
+							// Overwrite the last block with the now topped off one
+							if (this->mMemblockDevice.writeBlock(it1->blockPositions.back(), lastBlock) == 1) {
+								// Remove the part that we put in the lastBlock
+								content = content.substr(512 - contentStartPos, content.size());
+								// Get the amount of blocks left to write
+								numBlocks = (content.size() / 512) + 1;
+								std::vector<std::string> parsedContent(numBlocks);
+
+								for (int i = 1; i < numBlocks - 1; i++) {
+									// Insert the content in blocks of 512
+									parsedContent[i] = content.substr(0, 512);
+									// Remove what we just added
+									content = content.substr(512);
+								}
+								parsedContent[numBlocks - 1].resize(512);
+								// Insert the odd left overs and put a nul terminator at the end
+								if (this->insertIntoString(parsedContent[numBlocks - 1], 0, content) == -1) {
+									result = 1;
+								}
+
+								finished = true;
+								break;
+							}
+						}
+					}
+				}
+				
+				if (finished) {
+					break;
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+int FileSystem::appendContentToFile(std::string dirPath, std::string content)
+{
+	int result = -1;
+	Directory* pathDir = nullptr;
+	std::string path = dirPath;
+	std::string fileName;
+
+	if (parsePathAndDir(path, &pathDir) == 0) {
+		result = 0;
+
+		this->getFileNameFromPath(path, fileName);
+
+		if (this->getDirFromPath(path, &pathDir, false) != 0) {
+			result = 1;
+		}
+
+		if (result == 0) {
+			// Iterate through until right file is found. Clear the blocks that the file occupies and remove it from the list.
+			for (std::list<File>::iterator it = pathDir->files.begin(); it != pathDir->files.end(); it++) {
+				if (it->name == fileName) {
+					// Calculate how many complete blocks are needed. We add 1 since it always rounds downwards.
+					int numBlocks = (content.size() / 512) + 1;
+					std::vector<std::string> parsedContent(numBlocks);
+					// Get the last content of the file
+					parsedContent[0] = mMemblockDevice.readBlock(it->blockPositions.back()).toString();
+					// Get the position of the end of that content
+					int contentStartPos = parsedContent[0].size();
+
+					// Insert content until the block is filled
+					if (this->insertIntoString(parsedContent[0], contentStartPos, content) == -1) {
+						result = -1;
+					}
+
+					if (result == 0) {
+						for (int i = 1; i < numBlocks - 1; i++) {
+							// Insert the content in blocks of 512
+							parsedContent[i] = content.substr(0, 512);
+							// Remove what we just added
+							content = content.substr(512);
+						}
+						parsedContent[numBlocks - 1].resize(512);
+						// Insert the odd left overs and put a nul terminator at the end
+						if (this->insertIntoString(parsedContent[numBlocks - 1], 0, content) == -1) {
+							result = 1;
+						}
+					}
+
+					break;
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+int FileSystem::createDirectory(std::string dirPath)
 {
 	int result = 0;
 	Directory* pathDir = nullptr;
-	std::string path = name;
+	std::string path = dirPath;
 	std::string dirName;
 
 	if(parsePathAndDir(path, &pathDir) == 0) {
@@ -265,7 +404,7 @@ int FileSystem::createDirectory(std::string name)
 		{
 		case -1:
 		case 0:
-			// If it can't go to the next dir, then that means that no other dir exists with the same name as the one we want to create
+			// If it can't go to the next dir, then that means that no other dir exists with the same dirPath as the one we want to create
 			if (this->getNextDir(dirName, &pathDir) != 0) {
 				pathDir->dirs.push_back(Directory(dirName, pathDir));
 			}
@@ -286,11 +425,11 @@ int FileSystem::createDirectory(std::string name)
 	return result;
 }
 
-int FileSystem::removeFile(std::string name)
+int FileSystem::removeFile(std::string dirPath)
 {
 	int result = -1;
 	Directory* pathDir = nullptr;
-	std::string path = name;
+	std::string path = dirPath;
 	std::string fileName;
 
 	if (parsePathAndDir(path, &pathDir) == 0) {
@@ -361,8 +500,8 @@ int FileSystem::removeFolder(std::string dirPath)
 				nextDir += dirPath[i];
 				i++;
 			}
-			latest = nextDir; //saves the name of the latest directory for future use.
-			if (nextDir == "..") // if the next directory name is ".." we move the currDir to the parent. 
+			latest = nextDir; //saves the dirPath of the latest directory for future use.
+			if (nextDir == "..") // if the next directory dirPath is ".." we move the currDir to the parent. 
 			{
 				currDir = currDir->parent;
 			}
@@ -447,8 +586,8 @@ int FileSystem::changeDirectory(std::string dirPath)
 				nextDir += dirPath[i];
 				i++;
 			}
-			latest = nextDir; //saves the name of the latest directory for future use.
-			if (nextDir == "..") // if the next directory name is ".." we move the currDir to the parent. 
+			latest = nextDir; //saves the dirPath of the latest directory for future use.
+			if (nextDir == "..") // if the next directory dirPath is ".." we move the currDir to the parent. 
 			{
 				currDir = currDir->parent;
 				checker = true;
@@ -479,11 +618,11 @@ int FileSystem::changeDirectory(std::string dirPath)
 	return returnValue;
 }
 
-std::string FileSystem::list(std::string name)
+std::string FileSystem::list(std::string dirPath)
 {
 	int result = 0;
 	std::string list;
-	std::string path = name;
+	std::string path = dirPath;
 	std::string dirName;
 	Directory* pathDir;
 
@@ -515,14 +654,14 @@ std::string FileSystem::printWorkingDir()
 	std::string path;
 	Directory* currentDir = this->workingDir;
 
-	// Get the name of the current dir
+	// Get the dirPath of the current dir
 	path += currentDir->name;
 
 	// While currentDir has a parent, continue
 	while (currentDir->parent != nullptr) {
 		// Set currentDir to its parent
 		currentDir = currentDir->parent;
-		// Get the name of currentDir and add the rest of the path on top
+		// Get the dirPath of currentDir and add the rest of the path on top
 		path = currentDir->name + '/' + path;		
 	}
 

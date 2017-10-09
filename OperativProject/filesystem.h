@@ -51,27 +51,27 @@ public:
     */
 
     /* This function creates a file in the filesystem */
-    // createFile(...)
-	int createFile(std::string name, std::string content);
+	int createFile(std::string dirPath, std::string content);
+
+	int appendFileToFile(std::string dirPath1, std::string dirPath2);
+	int appendContentToFile(std::string dirPath, std::string content);
 
     /* Creates a folder in the filesystem */
-	int createDirectory(std::string name);
+	int createDirectory(std::string dirPath);
 
     /* Removes a file in the filesystem */
-    // removeFile(...);
-	int removeFile(std::string name);
+	int removeFile(std::string dirPath);
 
     /* Removes a folder in the filesystem */
-    // removeFolder(...);
 	int removeFolder(std::string dirPath);
 
     /* Function will move the current location to a specified location in the filesystem */
     // goToFolder(...);
+
 	int changeDirectory(std::string dirPath);
 
     /* This function will get all the files and folders in the specified folder */
-    // listDir(...);
-	std::string list(std::string name);
+	std::string list(std::string dirPath);
 
 	std::string printWorkingDir();
 };

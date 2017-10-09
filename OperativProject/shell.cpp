@@ -85,7 +85,7 @@ int main(void) {
             case 6: // restoreImage
                 break;
             case 7: // rm
-				result = fileSys.removeFolder(commandArr[1]);
+				result = fileSys.removeFile(commandArr[1]);
 				if (result == -1)
 				{
 					std::cout << "Invalid pathname." << std::endl;
