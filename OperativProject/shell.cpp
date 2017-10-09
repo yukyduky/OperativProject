@@ -55,7 +55,7 @@ int main(void) {
 			{
 				std::string content = "";
 				std::cout << "Input content: ";
-				std::cin >> content;
+				getline(std::cin, content);
 				result = fileSys.createFile(commandArr[1], content);
 
 				switch (result)
@@ -79,7 +79,7 @@ int main(void) {
 				break;
 			}
             case 4: // cat
-				std::cout << fileSys.printFile(commandArr[1]);
+				std::cout << fileSys.printFile(commandArr[1]) << std::endl;
                 break;
             case 5: // createImage
                 break;
@@ -89,11 +89,7 @@ int main(void) {
 				result = fileSys.removeFolder(commandArr[1]);
 				if (result == -1)
 				{
-					std::cout << "Invalid pathname." << std::endl;
-				}
-				else if (result == 1)
-				{
-					std::cout << "Missing final directory name." << std::endl;
+					std::cout << "Invalid path." << std::endl;
 				}
 				else
 				{
@@ -132,11 +128,7 @@ int main(void) {
 				result = fileSys.changeDirectory(commandArr[1]);
 				if (result == -1)
 				{
-					std::cout << "Invalid pathname." << std::endl;
-				}
-				else if (result == 1)
-				{
-					std::cout << "Missing final directory name." << std::endl;
+					std::cout << "Invalid path." << std::endl;
 				}
                 break;
             case 13: // pwd
