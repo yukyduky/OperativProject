@@ -38,7 +38,6 @@ private:
 	std::string listDir(Directory* dir);
 	int parsePathAndDir(std::string& path, Directory** pathDir);
 	int getNextDir(std::string dirName, Directory** currentDir);
-	int getPrevDir(std::string dirName, Directory** currentDir);
 	int getDirFromPath(std::string path, Directory** pathDir, bool createDirs);
 	int getFileNameFromPath(std::string& path, std::string& fileName);
 	int getNextDirNameFromPath(std::string& path, std::string& dirName);
