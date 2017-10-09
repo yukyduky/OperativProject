@@ -119,12 +119,14 @@ std::vector<int> MemBlockDevice::getFirstAvailableBlocks(int nrOfBlocks)
 {
 	int output = -1;
 	std::vector<int> blockPositions;
+	int i = 0;
 
-	for (int i = 0; i < this->occupiedBlock.size(); i++) {
+	while (blockPositions.size() < nrOfBlocks && i < this->occupiedBlock.size()) {
 		if (!this->occupiedBlock[i]) {
 			blockPositions.push_back(i);
-			break;
 		}
+
+		i++;
 	}
 
 	if (blockPositions.size() != nrOfBlocks) {
