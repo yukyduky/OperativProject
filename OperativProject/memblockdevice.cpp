@@ -2,7 +2,9 @@
 #include <stdexcept>
 
 MemBlockDevice::MemBlockDevice(int nrOfBlocks): BlockDevice(nrOfBlocks) {
-
+	for (int i = 0; i < occupiedBlock.size(); i++) {
+		occupiedBlock[i] = false;
+	}
 }
 
 MemBlockDevice::MemBlockDevice(const MemBlockDevice &other) : BlockDevice(other) {
@@ -46,6 +48,10 @@ int MemBlockDevice::writeBlock(int blockNr, const std::vector<char> &vec) {
         /* -2 = vec and block dont have same dimensions */
         /* 1 = success */
         output = this->memBlocks[blockNr].writeBlock(vec);
+
+		if (output == 1) {
+			this->occupiedBlock[blockNr] = true;
+		}
     }
     return output;
 }
@@ -57,6 +63,10 @@ int MemBlockDevice::writeBlock(int blockNr, const std::string &strBlock) {
         /* -2 = str-length and block dont have same dimensions */
         /* 1 = success */
         output = this->memBlocks[blockNr].writeBlock(strBlock);
+
+		if (output == 1) {
+			this->occupiedBlock[blockNr] = true;
+		}
     }
     return output;
 }
@@ -67,6 +77,8 @@ int MemBlockDevice::writeBlock(int blockNr, const char cArr[]) {
         output = 1;
         // Underlying function writeBlock cannot check array-dimension.
         this->memBlocks[blockNr].writeBlock(cArr);
+
+		this->occupiedBlock[blockNr] = true;
     }
     return output;
 }
@@ -80,6 +92,18 @@ Block MemBlockDevice::readBlock(int blockNr) const {
     }
 }
 
+int MemBlockDevice::clearBlock(int blockNr)
+{
+	int output = -1;    // Assume blockNr out-of-range
+	if (blockNr < this->nrOfBlocks && blockNr >= 0) {
+		output = 1;
+		this->memBlocks[blockNr].reset();
+		this->occupiedBlock[blockNr] = false;
+	}
+
+	return output;
+}
+
 /* Resets all the blocks */
 void MemBlockDevice::reset() {
     for (int i = 0; i < this->nrOfBlocks; ++i) {
@@ -89,4 +113,17 @@ void MemBlockDevice::reset() {
 
 int MemBlockDevice::size() const {
     return this->nrOfBlocks;
+}
+
+int MemBlockDevice::getFirstAvailableBlock()
+{
+	int output = -1;
+
+	for (int i = 0; i < this->occupiedBlock.size(); i++) {
+		if (!this->occupiedBlock[i]) {
+			output = i;
+		}
+	}
+
+	return output;
 }

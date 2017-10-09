@@ -6,7 +6,7 @@ const int MAXCOMMANDS = 8;
 const int NUMAVAILABLECOMMANDS = 15;
 
 std::string availableCommands[NUMAVAILABLECOMMANDS] = {
-    "quit","format","ls","create","cat","createImage","restoreImage",
+    "quit", "format","ls","create","cat","createImage","restoreImage",
     "rm","cp","append","mv","mkdir","cd","pwd","help"
 };
 
@@ -28,10 +28,10 @@ int main(void) {
     bool bRun = true;
 
     do {
-		for (int i = 0; i < MAXCOMMANDS; i++)
-		{
-			commandArr[i] = "";
+		for (int i = 0; i < MAXCOMMANDS; i++) {
+			commandArr[i].clear();
 		}
+
         std::cout << user << ":" << currentDir << "$ ";
         getline(std::cin, userCommand);
 
@@ -45,15 +45,39 @@ int main(void) {
 				bRun = quit();                
                 break;
             case 1: // format
-				fileSys.format();
 				std::cout << "Disk formated." << std::endl;
                 break;
             case 2: // ls
                 std::cout << "Listing directory" << std::endl;
-				std::cout << fileSys.listDir() << std::endl;
+				std::cout << fileSys.list(commandArr[1]) << std::endl;
                 break;
             case 3: // create
-                break;
+			{
+				std::string content = "";
+				std::cout << "Input content: ";
+				std::cin >> content;
+				result = fileSys.createFile(commandArr[1], content);
+
+				switch (result)
+				{
+				case -1:
+					std::cout << "Pathname missing, eg: \"test/test/test\" (relative) or \"/test/test/test\" (aboslute)" << std::endl;
+					break;
+				case 1:
+					std::cout << "Content exceeds max length." << std::endl;
+					break;
+				case 2:
+					std::cout << "Not enough memory left." << std::endl;
+					break;
+				case 3:
+					std::cout << "Failed to write to memory." << std::endl;
+				default:
+					std::cout << "Successfully created a new file." << std::endl;
+					break;
+				}
+
+				break;
+			}
             case 4: // cat
 				std::cout << fileSys.printFile(commandArr[1]);
                 break;
@@ -65,7 +89,7 @@ int main(void) {
 				result = fileSys.removeFolder(commandArr[1]);
 				if (result == -1)
 				{
-					std::cout << "Invalide pathname." << std::endl;
+					std::cout << "Invalid pathname." << std::endl;
 				}
 				else if (result == 1)
 				{
@@ -96,6 +120,8 @@ int main(void) {
 				case 2:
 					std::cout << "A folder with that name already exists." << std::endl;
 					break;
+				case 3:
+					std::cout << "This shouldn't happen." << std::endl;
 				default:
 					std::cout << "Successfully created a new dir." << std::endl;
 					break;
@@ -106,7 +132,7 @@ int main(void) {
 				result = fileSys.changeDirectory(commandArr[1]);
 				if (result == -1)
 				{
-					std::cout << "Invalide pathname." << std::endl;
+					std::cout << "Invalid pathname." << std::endl;
 				}
 				else if (result == 1)
 				{
