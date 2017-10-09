@@ -127,6 +127,27 @@ int main(void) {
 
                 break;
             case 10: // mv
+				result = fileSys.moveFile(commandArr[1], commandArr[2]);
+
+				switch (result)
+				{
+				case 0:
+					std::cout << "Successfully moved the file." << std::endl;
+					break;
+				case -1:
+					std::cout << "Pathname missing, eg: \"test/test/test\" (relative) or \"/test/test/test\" (aboslute)" << std::endl;
+					break;
+				case 1:
+					std::cout << "Directory doesn't exist." << std::endl;
+					break;
+				case 2:
+				case 4:
+					std::cout << "File could not be found." << std::endl;
+					break;
+				default:
+					break;
+				}
+
                 break;
             case 11: // mkdir
 				result = fileSys.createDirectory(commandArr[1]);

@@ -528,6 +528,45 @@ int FileSystem::removeFolder(std::string dirPath)
 	return returnValue;
 }
 
+int FileSystem::moveFile(std::string sourcePath, std::string destPath)
+{
+	int result = -1;
+	Directory* sourcePathDir = nullptr;
+	Directory* destPathDir = nullptr;
+	std::string sourceFileName;
+	std::string destFileName;
+
+	if (parsePathAndDir(sourcePath, &sourcePathDir) == 0 && parsePathAndDir(destPath, &destPathDir) == 0) {
+		result = 0;
+
+		if (this->getFileNameFromPath(sourcePath, sourceFileName) != 0) {
+			result = 4;
+		}
+
+		this->getFileNameFromPath(destPath, destFileName);
+
+		if (this->getDirFromPath(sourcePath, &sourcePathDir, false) == 0 && this->getDirFromPath(destPath, &destPathDir, false) == 0) {
+			result = 2;
+			// Find the file and move it to the new location with the new name and remove it from the old location
+			for (std::list<File>::iterator it = sourcePathDir->files.begin(); it != sourcePathDir->files.end(); it++) {
+				if (it->name == sourceFileName) {
+					destPathDir->files.push_back(*it);
+					destPathDir->files.back().name = destFileName;
+					sourcePathDir->files.erase(it);
+					result = 0;
+					break;
+				}
+			}
+		}
+		else {
+			result = 1;
+		}
+	}
+
+
+	return 0;
+}
+
 int FileSystem::changeDirectory(std::string dirPath)
 {
 	int returnValue = 0;

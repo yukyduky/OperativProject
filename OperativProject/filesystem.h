@@ -66,7 +66,7 @@ public:
 	int removeFolder(std::string dirPath);
 
     /* Function will move the current location to a specified location in the filesystem */
-    // goToFolder(...);
+	int moveFile(std::string sourcePath, std::string destPath);
 
 	int changeDirectory(std::string dirPath);
 
