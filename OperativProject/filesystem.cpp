@@ -621,3 +621,141 @@ std::string FileSystem::printFile(std::string dirPath)
 
 	return returnValue;
 }
+
+int FileSystem::createImage(std::string dirPath)
+{
+	int checker = 0;
+	int returnValue = 0;
+	std::ofstream myfile;
+	myfile.open(dirPath.c_str());
+	if (myfile.is_open())
+	{	
+		checker = this->saveFolder(&this->rootDir, myfile);
+
+		if (checker != 0)
+		{
+			returnValue = -1;
+		}
+		myfile.close();
+	}
+	else
+	{
+		returnValue = -1;
+	}
+
+	return returnValue;
+}
+
+int FileSystem::loadImage(std::string dirPath)
+{
+	this->format();
+	int checker = 0;
+	int returnValue = 0;
+	std::string waste;
+	std::ifstream myfile;
+	myfile.open(dirPath.c_str());
+	if (myfile.is_open())
+	{
+		std::getline(myfile, waste);
+		checker = this->recreateFolder(&this->rootDir, myfile);
+		if (checker != 0)
+		{
+			returnValue = -1;
+		}
+		myfile.close();
+	}
+	else
+	{
+		returnValue = -1;
+	}
+	return returnValue;
+}
+
+int FileSystem::saveFolder(Directory* dir, std::ofstream &fstream)
+{
+	int checker = 0;
+	int returnValue = 0;
+	File* currFile;
+	Block currBlock;
+	Directory* nextDir;
+
+	fstream << dir->name << std::endl;
+	fstream << dir->dirs.size() << std::endl;
+	fstream << dir->files.size() << std::endl;
+
+	for (std::list<File>::iterator j = dir->files.begin(); j != dir->files.end(); j++)
+	{
+		currFile = &(*j);
+		fstream << currFile->name << std::endl;
+		for (int i = 0; i < currFile->blockPositions.size(); i++)
+		{
+			currBlock = this->mMemblockDevice.readBlock(currFile->blockPositions[i]);
+			fstream << currBlock.toString();
+		}
+		fstream << std::endl;
+	}
+
+	for (std::list<Directory>::iterator j = dir->dirs.begin(); j != dir->dirs.end(); j++)
+	{
+		nextDir = &(*j);
+		checker = this->saveFolder(nextDir, fstream);
+		if (checker != 0)
+		{
+			returnValue = -1;
+			break;
+		}
+	}
+	return returnValue;
+}
+
+int FileSystem::recreateFolder(Directory* dir, std::ifstream &fstream)
+{
+	this->workingDir = dir;
+	int checker = 0;
+	int returnValue = 0;
+	int nrOfFolders = 0;
+	int nrOfFiles = 0;
+	Directory* nextDir;
+
+	std::string nextLine;
+	std::string contentOfFile;
+
+	//Get the number of folders in this directory
+	std::getline(fstream, nextLine);
+	nrOfFolders = std::stoi(nextLine);
+	//Get the number of files in this directory
+	std::getline(fstream, nextLine);
+	nrOfFiles = std::stoi(nextLine);
+
+	for (int i = 0; i < nrOfFiles; i++)
+	{
+		std::getline(fstream, nextLine);
+		std::getline(fstream, contentOfFile);
+		checker = this->createFile(nextLine, contentOfFile);
+		if (checker != 0)
+		{
+			returnValue = -1;
+			break;
+		}
+	}
+
+	for (int i = 0; i < nrOfFolders; i++)
+	{
+		std::getline(fstream, nextLine);
+		this->createDirectory(nextLine);
+
+		nextDir = &dir->dirs.back();
+		this->recreateFolder(nextDir, fstream);
+		this->workingDir = dir;
+	}
+
+	return returnValue;
+}
+
+void FileSystem::format()
+{
+	this->mMemblockDevice.resetMemBlock();
+	this->workingDir = &this->rootDir;
+	this->rootDir.dirs.clear();
+	this->rootDir.files.clear();
+}

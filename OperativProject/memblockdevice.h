@@ -38,6 +38,7 @@ public:
     /* Return the size */
     int size() const;
 	std::vector<int> MemBlockDevice::getFirstAvailableBlocks(int nrOfBlocks);
+	void resetMemBlock();
 };
 
 #endif // MEMBLOCKDEVICE_H

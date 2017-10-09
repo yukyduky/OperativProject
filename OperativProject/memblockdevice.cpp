@@ -135,3 +135,11 @@ std::vector<int> MemBlockDevice::getFirstAvailableBlocks(int nrOfBlocks)
 
 	return blockPositions;
 }
+
+void MemBlockDevice::resetMemBlock()
+{
+	for (int i = 0; i < occupiedBlock.size(); i++) {
+		occupiedBlock[i] = false;
+	}
+	this->reset();
+}

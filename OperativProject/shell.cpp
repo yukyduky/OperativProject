@@ -82,8 +82,26 @@ int main(void) {
 				std::cout << fileSys.printFile(commandArr[1]) << std::endl;
                 break;
             case 5: // createImage
-                break;
+				result = fileSys.createImage(commandArr[1]);
+				if (result == 0)
+				{
+					std::cout << "Create Image successfull." << std::endl;
+				}
+				else
+				{
+					std::cout << "Create Image failed." << std::endl;
+				}
+				break;
             case 6: // restoreImage
+				result = fileSys.loadImage(commandArr[1]);
+				if (result == 0)
+				{
+					std::cout << "Image loaded successfully." << std::endl;
+				}
+				else
+				{
+					std::cout << "Failed to load image." << std::endl;
+				}
                 break;
             case 7: // rm
 				result = fileSys.removeFile(commandArr[1]);

@@ -3,6 +3,7 @@
 
 #include "memblockdevice.h"
 #include <list>
+#include <fstream>
 
 class FileSystem
 {
@@ -77,6 +78,15 @@ public:
     /* Add your own member-functions if needed */
 
 	std::string printFile(std::string dirPath);
+
+	int createImage(std::string dirPath);
+	int loadImage(std::string dirPath);
+
+	int saveFolder(Directory* dir, std::ofstream &fstream);
+	int recreateFolder(Directory* dir, std::ifstream &fstream);
+
+	void format();
+
 
 };
 
