@@ -41,9 +41,10 @@ std::string FileSystem::listDir(Directory* dir)
 
 int FileSystem::parsePathAndDir(std::string& path, Directory** pathDir)
 {
-	int result = 0;
+	int result = -1;
 
 	if (path != "") {
+		result = 0;
 		// Absolute path
 		if (path.front() == '/') {
 			*pathDir = &this->rootDir;
@@ -55,45 +56,34 @@ int FileSystem::parsePathAndDir(std::string& path, Directory** pathDir)
 			*pathDir = this->workingDir;
 		}
 	}
-	else {
-		result = -1;
-	}
 
 	return result;
 }
 
 int FileSystem::getNextDir(std::string dirName, Directory** currentDir)
 {
-	int result = 0;
+	int result = -1;
 	Directory* nextDir = nullptr;
 
-	// Iterate through and look for a dir with the correct dirPath
-	for (std::list<Directory>::iterator it = (*currentDir)->dirs.begin(); it != (*currentDir)->dirs.end(); it++) {
-		if (it->name == dirName) {
-			nextDir = &(*it);
-			break;
-		}
-	}
-	if (nextDir != nullptr) {
-		*currentDir = nextDir;
-	}
-	else {
-		result = -1;
-	}
-
-	return result;
-}
-
-int FileSystem::getPrevDir(std::string dirName, Directory** currentDir)
-{
-	int result = 0;
-
-	// Get the previous by assigning it's parent to itself
-	if ((*currentDir)->parent != nullptr) {
+	if (dirName == ".." && (*currentDir)->parent != nullptr) {
+		result = 0;
 		*currentDir = (*currentDir)->parent;
 	}
+	else if (dirName == ".") {
+		result = 0;
+	}
 	else {
-		result = -1;
+		// Iterate through and look for a dir with the correct dirPath
+		for (std::list<Directory>::iterator it = (*currentDir)->dirs.begin(); it != (*currentDir)->dirs.end(); it++) {
+			if (it->name == dirName) {
+				nextDir = &(*it);
+				break;
+			}
+		}
+		if (nextDir != nullptr) {
+			result = 0;
+			*currentDir = nextDir;
+		}
 	}
 
 	return result;
@@ -109,7 +99,7 @@ int FileSystem::getDirFromPath(std::string path, Directory** pathDir, bool creat
 	std::string currentPath = path;
 	std::string dirName;
 
-	// Get next dir dirPath and then look for the next dir from that
+	// Get next dir name and then look for the next dir from that
 	while (this->getNextDirNameFromPath(currentPath, dirName) == 0) {
 		if (this->getNextDir(dirName, pathDir) != 0) {
 			if (!createDirs) {
