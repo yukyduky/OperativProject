@@ -291,7 +291,7 @@ int FileSystem::appendFileToFile(std::string dirPath1, std::string dirPath2)
 							// Get the position of the end of that content
 							int contentStartPos = lastBlock.size();
 
-							for (int i = 0; i < content.size(); i++) {
+							for (int i = 0; i < 512 - contentStartPos; i++) {
 								parsedLastBlock[contentStartPos + i] += content[i];
 							}
 							// Overwrite the last block with the now topped off one
@@ -348,62 +348,6 @@ int FileSystem::appendFileToFile(std::string dirPath1, std::string dirPath2)
 				}
 				
 				if (finished) {
-					break;
-				}
-			}
-		}
-	}
-
-	return result;
-}
-
-int FileSystem::appendContentToFile(std::string dirPath, std::string content)
-{
-	int result = -1;
-	Directory* pathDir = nullptr;
-	std::string path = dirPath;
-	std::string fileName;
-
-	if (parsePathAndDir(path, &pathDir) == 0) {
-		result = 0;
-
-		this->getFileNameFromPath(path, fileName);
-
-		if (this->getDirFromPath(path, &pathDir, false) != 0) {
-			result = 1;
-		}
-
-		if (result == 0) {
-			// Iterate through until right file is found. Clear the blocks that the file occupies and remove it from the list.
-			for (std::list<File>::iterator it = pathDir->files.begin(); it != pathDir->files.end(); it++) {
-				if (it->name == fileName) {
-					// Calculate how many complete blocks are needed. We add 1 since it always rounds downwards.
-					int numBlocks = (content.size() / 512) + 1;
-					std::vector<std::string> parsedContent(numBlocks);
-					// Get the last content of the file
-					parsedContent[0] = mMemblockDevice.readBlock(it->blockPositions.back()).toString();
-					// Get the position of the end of that content
-					int contentStartPos = parsedContent[0].size();
-
-					// Insert content until the block is filled
-					if (this->insertIntoString(parsedContent[0], contentStartPos, content) == -1) {
-						result = -1;
-					}
-
-					if (result == 0) {
-						for (int i = 1; i < numBlocks - 1; i++) {
-							// Insert the content in blocks of 512
-							parsedContent[i] = content.substr(0, 512);
-							// Remove what we just added
-							content = content.substr(512);
-						}
-						parsedContent[numBlocks - 1].resize(512);
-						// Insert the odd left overs and put a nul terminator at the end
-						if (this->insertIntoString(parsedContent[numBlocks - 1], 0, content) == -1) {
-							result = 1;
-						}
-					}
-
 					break;
 				}
 			}

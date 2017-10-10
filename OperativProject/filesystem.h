@@ -54,7 +54,6 @@ public:
 	int createFile(std::string dirPath, std::string content);
 
 	int appendFileToFile(std::string dirPath1, std::string dirPath2);
-	int appendContentToFile(std::string dirPath, std::string content);
 
     /* Creates a folder in the filesystem */
 	int createDirectory(std::string dirPath);
