@@ -45,6 +45,7 @@ int main(void) {
 				bRun = quit();                
                 break;
             case 1: // format
+				fileSys.format();
 				std::cout << "Disk formated." << std::endl;
                 break;
             case 2: // ls

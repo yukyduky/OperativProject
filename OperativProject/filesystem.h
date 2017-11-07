@@ -41,6 +41,8 @@ private:
 	int getDirFromPath(std::string path, Directory** pathDir, bool createDirs);
 	int getFileNameFromPath(std::string& path, std::string& fileName);
 	int getNextDirNameFromPath(std::string& path, std::string& dirName);
+	int saveFolder(Directory* dir, std::ofstream &fstream);
+	int recreateFolder(Directory* dir, std::ifstream &fstream);
 
 public:
     FileSystem();
@@ -61,9 +63,6 @@ public:
     /* Removes a file in the filesystem */
 	int removeFile(std::string dirPath);
 
-    /* Removes a folder in the filesystem */
-	int removeFolder(std::string dirPath);
-
     /* Function will move the current location to a specified location in the filesystem */
 	int moveFile(std::string sourcePath, std::string destPath);
 
@@ -81,9 +80,6 @@ public:
 
 	int createImage(std::string dirPath);
 	int loadImage(std::string dirPath);
-
-	int saveFolder(Directory* dir, std::ofstream &fstream);
-	int recreateFolder(Directory* dir, std::ifstream &fstream);
 
 	void format();
 

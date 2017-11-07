@@ -291,9 +291,17 @@ int FileSystem::appendFileToFile(std::string dirPath1, std::string dirPath2)
 							// Get the position of the end of that content
 							int contentStartPos = lastBlock.size();
 
-							for (int i = 0; i < 512 - contentStartPos; i++) {
+							/*for (int i = 0; i < 512 - contentStartPos; i++) {
 								parsedLastBlock[contentStartPos + i] += content[i];
+							}*/
+
+							int j = 0;
+							
+							while (j < 512 - contentStartPos && j < content.size()) {
+								parsedLastBlock[contentStartPos + j] += content[j];
+								j++;
 							}
+
 							// Overwrite the last block with the now topped off one
 							if (this->mMemblockDevice.writeBlock(it1->blockPositions.back(), parsedLastBlock) == 1 && content.size() > 512) {
 								// Remove the part that we put in the lastBlock
@@ -428,40 +436,6 @@ int FileSystem::removeFile(std::string dirPath)
 	return result;
 }
 
-int FileSystem::removeFolder(std::string dirPath)
-{
-	int returnValue = 0;
-	Directory* currDir;
-	std::string toRemove;
-
-	returnValue = parsePathAndDir(dirPath, &currDir);
-	if (returnValue == 0)
-	{
-		returnValue = getFileNameFromPath(dirPath, toRemove);
-		if (returnValue == 0)
-		{
-			returnValue = getDirFromPath(dirPath, &currDir, false);
-			if (returnValue == 0)
-			{
-				for (std::list<Directory>::iterator j = currDir->dirs.begin(); j != currDir->dirs.end(); j++)
-				{
-					if (j->name == toRemove)
-					{
-						j = currDir->dirs.erase(j);
-						returnValue = 0;
-						break;
-					}
-					else
-					{
-						returnValue = -1;
-					}
-				}
-			}
-		}
-	}
-	return returnValue;
-}
-
 int FileSystem::moveFile(std::string sourcePath, std::string destPath)
 {
 	int result = -1;
@@ -583,7 +557,7 @@ std::string FileSystem::list(std::string dirPath)
 
 	// Try parsing the path is there is one
 	if (this->parsePathAndDir(path, &pathDir) == 0) {
-		// Get the dir that is suppose to hold the new dir
+		// Get the dir
 		result = this->getDirFromPath(path, &pathDir, false);
 
 		switch (result)
